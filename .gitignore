@@ -1,0 +1,33 @@
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary / backup
+*.tmp
+*.temp
+*.bak
+*.old
+*.log
+
+# Local configuration / exports
+*.wsc.json
+Windows-Shortcut-Control-Shortcuts-*.json
+Windows-Shortcut-Control-FullBackup-*.json
+
+# Secrets / environment files
+.env
+.env.*
+secrets.*
+credentials.*
+
+# Build / packaging output
+dist/
+build/
+release/
