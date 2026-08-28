@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/baska-pro/windows-shortcut-control/security
+    about: Do not disclose sensitive vulnerabilities in a public issue.
