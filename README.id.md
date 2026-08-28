@@ -5,11 +5,20 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/Windows-7%20SP1%20%7C%2010%20%7C%2011-0078D4?style=flat-square&logo=windows&logoColor=white" alt="Windows 7 SP1, 10 dan 11">
   <img src="https://img.shields.io/badge/PowerShell-5.1%2B-5391FE?style=flat-square&logo=powershell&logoColor=white" alt="PowerShell 5.1+">
   <img src="https://img.shields.io/badge/Versi-3.2.1-111827?style=flat-square" alt="Versi 3.2.1">
   <img src="https://img.shields.io/badge/Portable-Satu%20File-16A34A?style=flat-square" alt="Portable">
   <img src="https://img.shields.io/badge/Bahasa-ID%20%7C%20EN-9333EA?style=flat-square" alt="Indonesia dan English">
+</p>
+
+<p align="center">
+  <a href="https://github.com/baska-pro/windows-shortcut-control/releases/latest">
+    <img src="https://img.shields.io/github/v/release/baska-pro/windows-shortcut-control?style=for-the-badge&label=Download%20Terbaru" alt="Download release terbaru">
+  </a>
+  <a href="https://github.com/baska-pro/windows-shortcut-control/releases">
+    <img src="https://img.shields.io/github/downloads/baska-pro/windows-shortcut-control/total?style=for-the-badge&label=Downloads" alt="Total download">
+  </a>
 </p>
 
 <p align="center">
@@ -30,7 +39,134 @@
 
 Aplikasi menyatukan shortcut pribadi, Windows Tools, informasi sistem, backup/recovery, startup Windows, System Tray, pencarian global, dan navigasi keyboard dalam satu antarmuka.
 
-Tidak memerlukan installer atau dependency eksternal pada instalasi Windows desktop standar.
+Pada Windows 10/11 normal, aplikasi tidak memerlukan installer atau dependency eksternal tambahan. Windows 7 juga didukung selama PowerShell dan komponen .NET/WPF yang diperlukan tersedia.
+
+## Kompatibilitas
+
+| Platform | Status | Keterangan |
+|---|---|---|
+| Windows 11 | ✅ Didukung | Target Windows modern utama |
+| Windows 10 | ✅ Didukung | Didukung |
+| Windows 7 SP1 | ✅ Sudah diuji | Membutuhkan Windows PowerShell 5.1 dan komponen .NET/WPF yang kompatibel |
+| Windows Server | ⚠️ Bukan target utama | Fitur desktop/WPF bergantung pada komponen GUI yang terpasang |
+
+> Windows 7 tidak membawa Windows PowerShell 5.1 secara default. Jika diperlukan, instal **Windows Management Framework 5.1** terlebih dahulu.
+
+
+## Download, Clone & Instalasi dari GitHub
+
+Ada tiga cara mudah untuk mendapatkan Windows Shortcut Control ke PC.
+
+### Opsi 1 — Download Release Terbaru (Disarankan)
+
+Ini cara paling mudah dan **tidak membutuhkan Git**.
+
+1. Buka [release terbaru](https://github.com/baska-pro/windows-shortcut-control/releases/latest).
+2. Pada bagian **Assets**, download:
+
+```text
+Windows_Shortcut_Control.cmd
+```
+
+3. Simpan file ke folder permanen, misalnya:
+
+```text
+C:\Tools\Windows-Shortcut-Control\
+```
+
+4. Double-click `Windows_Shortcut_Control.cmd`.
+
+Jika Windows memblokir file hasil download, klik kanan file → **Properties** → aktifkan **Unblock** jika opsi tersebut tersedia → **Apply**.
+
+Bisa juga menggunakan PowerShell:
+
+```powershell
+Unblock-File -Path "C:\Tools\Windows-Shortcut-Control\Windows_Shortcut_Control.cmd"
+```
+
+### Opsi 2 — Download Repository sebagai ZIP
+
+Tidak perlu menginstal Git.
+
+1. Buka repository:
+   `https://github.com/baska-pro/windows-shortcut-control`
+2. Klik tombol **Code**.
+3. Pilih **Download ZIP**.
+4. Extract file ZIP.
+5. Buka folder hasil extract.
+6. Jalankan:
+
+```text
+Windows_Shortcut_Control.cmd
+```
+
+Metode ini juga mengunduh README, dokumentasi, screenshot, changelog, dan file repository lainnya.
+
+### Opsi 3 — Clone Menggunakan Git
+
+Gunakan metode ini jika ingin menyimpan repository secara lokal dan mudah melakukan update.
+
+Buka **Command Prompt**, **PowerShell**, atau **Windows Terminal**, lalu jalankan:
+
+```bash
+git clone https://github.com/baska-pro/windows-shortcut-control.git
+cd windows-shortcut-control
+```
+
+Kemudian jalankan:
+
+```cmd
+Windows_Shortcut_Control.cmd
+```
+
+Atau dari PowerShell:
+
+```powershell
+.\Windows_Shortcut_Control.cmd
+```
+
+Untuk memperbarui repository yang sudah pernah di-clone:
+
+```bash
+git pull
+```
+
+> Jika Git belum terpasang, gunakan metode Release atau Download ZIP.
+
+## Instalasi / Menjalankan Pertama Kali
+
+Windows Shortcut Control merupakan **aplikasi portable**, jadi tidak memiliki installer tradisional.
+
+Setup yang disarankan:
+
+1. Simpan `Windows_Shortcut_Control.cmd` di folder permanen.
+2. Jalankan file tersebut.
+3. Ikuti atau lewati panduan penggunaan pertama.
+4. Tambahkan atau import shortcut.
+5. Buka **Settings** jika ingin:
+   - menjalankan aplikasi otomatis saat login Windows;
+   - memulai aplikasi langsung di System Tray;
+   - mengatur fungsi tombol Close;
+   - mengaktifkan global hotkey;
+   - memilih Bahasa Indonesia atau English;
+   - membuat backup konfigurasi.
+
+Contoh lokasi yang disarankan:
+
+```text
+C:\Tools\Windows-Shortcut-Control\
+```
+
+### Opsional — Shortcut Desktop
+
+Klik kanan `Windows_Shortcut_Control.cmd` → **Send to → Desktop (create shortcut)**.
+
+### Opsional — Jalankan Otomatis Saat Login
+
+Startup dapat diaktifkan langsung dari menu **Settings** aplikasi.
+
+Jika startup sudah diaktifkan, usahakan file `.cmd` tetap berada di lokasi yang sama. Memindahkan atau mengganti nama file setelah itu dapat membuat path startup tidak valid.
+
 
 ## Fitur Utama
 
@@ -102,27 +238,26 @@ Screenshot lainnya tersedia di [`assets/screenshots/`](./assets/screenshots/).
 | Terminal | PowerShell, Command Prompt |
 | Data & Recovery | Import/export, full backup/restore, Last Known Good, reset, diagnostics, Registry data |
 
+> Ketersediaan Windows Tools tertentu bergantung pada versi Windows. Beberapa tool atau halaman Settings yang tersedia pada Windows 10/11 mungkin tidak tersedia pada Windows 7.
+
 ## Persyaratan
+
+### Windows 10 / 11
 
 - Windows 10 atau Windows 11 desktop
 - Windows PowerShell 5.1 atau lebih baru
 - Komponen WPF/.NET bawaan Windows desktop
-- **Tidak perlu Administrator untuk penggunaan normal**
-- Beberapa tool administrasi atau shortcut tertentu dapat meminta elevasi/UAC
+
+### Windows 7
+
+- Windows 7 SP1
+- Windows PowerShell 5.1
+- Windows Management Framework 5.1 jika PowerShell 5.1 belum terpasang
+- .NET Framework/WPF yang kompatibel
+
+**Administrator tidak diperlukan untuk penggunaan normal.** Beberapa tool administrasi atau shortcut tertentu dapat meminta elevasi/UAC.
 
 > Launcher `.cmd` menjalankan `powershell.exe` menggunakan `ExecutionPolicy Bypass` untuk mengeksekusi kode aplikasi yang tertanam. Selalu periksa source sebelum menjalankan file yang diunduh dari Internet.
-
-## Cara Menjalankan
-
-1. Download `Windows_Shortcut_Control.cmd`.
-2. Simpan di folder permanen.
-3. Double-click file tersebut.
-4. Ikuti atau lewati panduan awal.
-5. Jika diperlukan, aktifkan **Jalankan otomatis saat login Windows** melalui Settings.
-
-### Penting
-
-Jika startup Windows sudah diaktifkan, jangan memindahkan atau mengganti nama file `.cmd` tanpa memperbarui konfigurasi startup.
 
 ## Penyimpanan Data
 
@@ -175,6 +310,26 @@ Versi publik saat ini:
 ```text
 3.2.1
 ```
+
+Project aktif dipelihara dan telah diuji pada Windows 7 SP1 serta Windows versi modern.
+
+## Issues & Feature Requests
+
+Gunakan GitHub Issues untuk:
+
+- bug yang dapat direproduksi;
+- masalah kompatibilitas;
+- permintaan fitur;
+- saran UI/UX.
+
+Untuk laporan kompatibilitas Windows 7, sertakan:
+
+- edisi dan arsitektur Windows 7;
+- konfirmasi bahwa SP1 sudah terpasang;
+- versi PowerShell (`$PSVersionTable.PSVersion`);
+- hasil Self Diagnostics yang relevan.
+
+Jangan mengirim password, token, private path, backup pribadi, atau informasi sensitif lainnya ke public issue.
 
 ## Lisensi
 
