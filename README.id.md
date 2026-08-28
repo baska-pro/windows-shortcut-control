@@ -56,6 +56,41 @@ Tidak memerlukan installer atau dependency eksternal pada instalasi Windows desk
 - Single-instance activation
 - Bahasa Indonesia dan English
 
+## Screenshot
+
+<p align="center">
+  <img src="./assets/screenshots/dashboard.JPG" width="92%" alt="Dashboard Windows Shortcut Control">
+</p>
+
+<p align="center">
+  <sub>Dashboard — shortcut pin, favorit, item terbaru, dan akses cepat.</sub>
+</p>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./assets/screenshots/shortcuts.JPG" width="100%" alt="Pengelola Shortcut"><br>
+      <strong>Pengelola Shortcut</strong>
+    </td>
+    <td width="50%" align="center">
+      <img src="./assets/screenshots/windows-tools.JPG" width="100%" alt="Windows Tools"><br>
+      <strong>Windows Tools</strong>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./assets/screenshots/settings.JPG" width="100%" alt="Pengaturan"><br>
+      <strong>Pengaturan</strong>
+    </td>
+    <td width="50%" align="center">
+      <img src="./assets/screenshots/guide.JPG" width="100%" alt="Panduan bawaan"><br>
+      <strong>Panduan Bawaan</strong>
+    </td>
+  </tr>
+</table>
+
+Screenshot lainnya tersedia di [`assets/screenshots/`](./assets/screenshots/).
+
 ## Windows Tools
 
 | Kategori | Tools |
@@ -132,16 +167,6 @@ Baca [Privacy](./docs/PRIVACY.md).
 | `F1` | Panduan |
 | `F5` | Refresh |
 | `Ctrl + Alt + Space` | Global hotkey jika diaktifkan |
-
-## Screenshot
-
-Folder berikut sudah disiapkan:
-
-```text
-assets/screenshots/
-```
-
-Tambahkan screenshot aplikasi ke folder tersebut agar halaman repo lebih menarik.
 
 ## Status
 
