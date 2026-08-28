@@ -61,6 +61,41 @@ No installer or external runtime package is required on a standard Windows deskt
 - Single-instance activation
 - Indonesian and English UI
 
+## Screenshots
+
+<p align="center">
+  <img src="./assets/screenshots/dashboard.JPG" width="92%" alt="Windows Shortcut Control Dashboard">
+</p>
+
+<p align="center">
+  <sub>Dashboard — pinned shortcuts, favorites, recent items, and quick access.</sub>
+</p>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./assets/screenshots/shortcuts.JPG" width="100%" alt="Shortcut Manager"><br>
+      <strong>Shortcut Manager</strong>
+    </td>
+    <td width="50%" align="center">
+      <img src="./assets/screenshots/windows-tools.JPG" width="100%" alt="Windows Tools"><br>
+      <strong>Windows Tools</strong>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./assets/screenshots/settings.JPG" width="100%" alt="Settings"><br>
+      <strong>Settings</strong>
+    </td>
+    <td width="50%" align="center">
+      <img src="./assets/screenshots/guide.JPG" width="100%" alt="Built-in Guide"><br>
+      <strong>Built-in Guide</strong>
+    </td>
+  </tr>
+</table>
+
+More visual assets are available in [`assets/screenshots/`](./assets/screenshots/).
+
 ## Built-in Windows Tools
 
 Windows Shortcut Control includes quick access to commonly used Windows tools such as:
@@ -141,23 +176,6 @@ See [Privacy](./docs/PRIVACY.md) for details.
 | `F1` | User Guide |
 | `F5` | Refresh |
 | `Ctrl + Alt + Space` | Global hotkey, when enabled |
-
-## Screenshots
-
-The repository includes an `assets/screenshots/` folder prepared for application screenshots.
-
-Recommended files:
-
-```text
-assets/screenshots/dashboard.png
-assets/screenshots/shortcuts.png
-assets/screenshots/windows-tools.png
-assets/screenshots/system-info.png
-assets/screenshots/settings.png
-assets/screenshots/guide.png
-```
-
-After adding screenshots, you can embed them here.
 
 ## Architecture
 
