@@ -32,12 +32,6 @@ Configure startup behavior, System Tray, Close button behavior, language, global
 
 Interactive first-run and on-demand guide for learning the application's menus and controls.
 
-## Additional Capture
-
-![Additional Capture](./Capture.JPG)
-
-Additional application preview.
-
 ---
 
 ### Screenshot Guidelines
