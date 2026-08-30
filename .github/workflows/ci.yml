@@ -70,9 +70,11 @@ jobs:
               )
           }
 
-          $raw = Get-Content `
-              -LiteralPath 'Windows_Shortcut_Control.cmd' `
-              -Raw
+          $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+          $raw = [System.IO.File]::ReadAllText(
+              (Join-Path $PWD 'Windows_Shortcut_Control.cmd'),
+              $utf8
+          )
 
           $pattern = "\`$script:AppVersion\s*=\s*'([^']+)'"
 
@@ -122,9 +124,11 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
 
-          $raw = Get-Content `
-              -LiteralPath 'Windows_Shortcut_Control.cmd' `
-              -Raw
+          $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+          $raw = [System.IO.File]::ReadAllText(
+              (Join-Path $PWD 'Windows_Shortcut_Control.cmd'),
+              $utf8
+          )
 
           $marker = '###<LAVI_POWERSHELL>###'
 
@@ -160,12 +164,20 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
 
-          $raw = Get-Content `
-              -LiteralPath 'Windows_Shortcut_Control.cmd' `
-              -Raw
+          $path = Join-Path $PWD 'Windows_Shortcut_Control.cmd'
+          $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+
+          try {
+              $raw = [System.IO.File]::ReadAllText(
+                  $path,
+                  $utf8
+              )
+          }
+          catch {
+              throw "Failed to read application as UTF-8: $($_.Exception.Message)"
+          }
 
           $marker = '###<LAVI_POWERSHELL>###'
-
           $index = $raw.LastIndexOf($marker)
 
           if ($index -lt 0) {
@@ -176,6 +188,10 @@ jobs:
               $index + $marker.Length
           )
 
+          if ([string]::IsNullOrWhiteSpace($code)) {
+              throw 'Embedded PowerShell application is empty.'
+          }
+
           $tokens = $null
           $errors = $null
 
@@ -185,25 +201,24 @@ jobs:
               [ref]$errors
           ) | Out-Null
 
-          if ($errors.Count -gt 0) {
+          if ($null -ne $errors -and $errors.Count -gt 0) {
               foreach ($errorItem in $errors) {
                   Write-Host (
-                      "Parser error line {0}: {1}" -f
+                      "Parser error line {0}, column {1}: {2}" -f
                       $errorItem.Extent.StartLineNumber,
+                      $errorItem.Extent.StartColumnNumber,
                       $errorItem.Message
                   )
               }
 
               throw (
                   "Windows PowerShell 5.1 parser found " +
-                  "$($errors.Count) error(s)."
+                  "$($errors.Count) genuine syntax error(s)."
               )
           }
 
-          Write-Host (
-              'Windows PowerShell 5.1 syntax ' +
-              'validation passed.'
-          )
+          Write-Host 'Windows PowerShell 5.1 UTF-8 decoding: OK'
+          Write-Host 'Windows PowerShell 5.1 syntax validation: OK'
 
       # ============================================================
       # POWERSHELL 7
@@ -213,9 +228,10 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
 
-          $raw = Get-Content `
-              -LiteralPath 'Windows_Shortcut_Control.cmd' `
-              -Raw
+          $raw = [System.IO.File]::ReadAllText(
+              (Join-Path $PWD 'Windows_Shortcut_Control.cmd'),
+              [System.Text.UTF8Encoding]::new($false, $true)
+          )
 
           $marker = '###<LAVI_POWERSHELL>###'
 
@@ -229,6 +245,10 @@ jobs:
               $index + $marker.Length
           )
 
+          if ([string]::IsNullOrWhiteSpace($code)) {
+              throw 'Embedded PowerShell application is empty.'
+          }
+
           $tokens = $null
           $errors = $null
 
@@ -238,24 +258,24 @@ jobs:
               [ref]$errors
           ) | Out-Null
 
-          if ($errors.Count -gt 0) {
+          if ($null -ne $errors -and $errors.Count -gt 0) {
               foreach ($errorItem in $errors) {
                   Write-Host (
-                      "Parser error line {0}: {1}" -f
+                      "Parser error line {0}, column {1}: {2}" -f
                       $errorItem.Extent.StartLineNumber,
+                      $errorItem.Extent.StartColumnNumber,
                       $errorItem.Message
                   )
               }
 
               throw (
                   "PowerShell 7 parser found " +
-                  "$($errors.Count) error(s)."
+                  "$($errors.Count) genuine syntax error(s)."
               )
           }
 
-          Write-Host (
-              'PowerShell 7 syntax validation passed.'
-          )
+          Write-Host 'PowerShell 7 UTF-8 decoding: OK'
+          Write-Host 'PowerShell 7 syntax validation: OK'
 
       # ============================================================
       # BATCH BOOTSTRAP
@@ -288,9 +308,11 @@ jobs:
               Get-Content -LiteralPath 'VERSION' -Raw
           ).Trim()
 
-          $readme = Get-Content `
-              -LiteralPath 'README.md' `
-              -Raw
+          $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+          $readme = [System.IO.File]::ReadAllText(
+              (Join-Path $PWD 'README.md'),
+              $utf8
+          )
 
           if ($readme -notmatch [regex]::Escape($version)) {
               Write-Warning (
@@ -316,9 +338,11 @@ jobs:
               Get-Content -LiteralPath 'VERSION' -Raw
           ).Trim()
 
-          $changelog = Get-Content `
-              -LiteralPath 'CHANGELOG.md' `
-              -Raw
+          $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+          $changelog = [System.IO.File]::ReadAllText(
+              (Join-Path $PWD 'CHANGELOG.md'),
+              $utf8
+          )
 
           if ($changelog -notmatch [regex]::Escape($version)) {
               throw (
@@ -394,6 +418,7 @@ jobs:
           )
 
           $findings = @()
+          $utf8 = New-Object System.Text.UTF8Encoding($false, $false)
 
           foreach ($file in $files) {
               if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
@@ -401,10 +426,10 @@ jobs:
               }
 
               try {
-                  $content = Get-Content `
-                      -LiteralPath $file `
-                      -Raw `
-                      -ErrorAction Stop
+                  $content = [System.IO.File]::ReadAllText(
+                      (Join-Path $PWD $file),
+                      $utf8
+                  )
               }
               catch {
                   continue
