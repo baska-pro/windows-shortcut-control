@@ -1,0 +1,474 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: validate
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ============================================================
+      # REQUIRED FILES
+      # ============================================================
+      - name: Validate required files
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $required = @(
+              'Windows_Shortcut_Control.cmd',
+              'VERSION',
+              'README.md',
+              'CHANGELOG.md',
+              'LICENSE',
+              'SECURITY.md'
+          )
+
+          foreach ($file in $required) {
+              if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+                  throw "Required file missing: $file"
+              }
+
+              Write-Host "OK: $file"
+          }
+
+      # ============================================================
+      # VERSION
+      # ============================================================
+      - name: Validate application version
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $version = (
+              Get-Content -LiteralPath 'VERSION' -Raw
+          ).Trim()
+
+          if ($version -notmatch '^\d+\.\d+\.\d+$') {
+              throw (
+                  "VERSION must use semantic version format. " +
+                  "Example: 3.2.1"
+              )
+          }
+
+          $raw = Get-Content `
+              -LiteralPath 'Windows_Shortcut_Control.cmd' `
+              -Raw
+
+          $pattern = "\`$script:AppVersion\s*=\s*'([^']+)'"
+
+          $match = [regex]::Match(
+              $raw,
+              $pattern
+          )
+
+          if (-not $match.Success) {
+              throw (
+                  'Unable to find $script:AppVersion in ' +
+                  'Windows_Shortcut_Control.cmd'
+              )
+          }
+
+          $scriptVersion = $match.Groups[1].Value
+
+          Write-Host "VERSION file : $version"
+          Write-Host "Application  : $scriptVersion"
+
+          if ($scriptVersion -ne $version) {
+              throw (
+                  "Version mismatch: VERSION=$version, " +
+                  "AppVersion=$scriptVersion"
+              )
+          }
+
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+              $expectedTag = "v$version"
+
+              if ($env:GITHUB_REF_NAME -ne $expectedTag) {
+                  throw (
+                      "Release tag mismatch: " +
+                      "$($env:GITHUB_REF_NAME) must be " +
+                      "$expectedTag"
+                  )
+              }
+          }
+
+          Write-Host "Version validation passed: $version"
+
+      # ============================================================
+      # EMBEDDED APP VALIDATION
+      # ============================================================
+      - name: Validate embedded PowerShell marker
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $raw = Get-Content `
+              -LiteralPath 'Windows_Shortcut_Control.cmd' `
+              -Raw
+
+          $marker = '###<LAVI_POWERSHELL>###'
+
+          $first = $raw.IndexOf($marker)
+          $last = $raw.LastIndexOf($marker)
+
+          if ($first -lt 0) {
+              throw 'Embedded PowerShell marker not found.'
+          }
+
+          if ($first -ne $last) {
+              throw (
+                  'Embedded PowerShell marker must appear ' +
+                  'exactly once.'
+              )
+          }
+
+          $code = $raw.Substring(
+              $last + $marker.Length
+          )
+
+          if ([string]::IsNullOrWhiteSpace($code)) {
+              throw 'Embedded PowerShell application is empty.'
+          }
+
+          Write-Host 'Embedded application marker is valid.'
+
+      # ============================================================
+      # WINDOWS POWERSHELL 5.1
+      # ============================================================
+      - name: Parse embedded PowerShell with Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $raw = Get-Content `
+              -LiteralPath 'Windows_Shortcut_Control.cmd' `
+              -Raw
+
+          $marker = '###<LAVI_POWERSHELL>###'
+
+          $index = $raw.LastIndexOf($marker)
+
+          if ($index -lt 0) {
+              throw 'Embedded PowerShell marker not found.'
+          }
+
+          $code = $raw.Substring(
+              $index + $marker.Length
+          )
+
+          $tokens = $null
+          $errors = $null
+
+          [System.Management.Automation.Language.Parser]::ParseInput(
+              $code,
+              [ref]$tokens,
+              [ref]$errors
+          ) | Out-Null
+
+          if ($errors.Count -gt 0) {
+              foreach ($errorItem in $errors) {
+                  Write-Host (
+                      "Parser error line {0}: {1}" -f
+                      $errorItem.Extent.StartLineNumber,
+                      $errorItem.Message
+                  )
+              }
+
+              throw (
+                  "Windows PowerShell 5.1 parser found " +
+                  "$($errors.Count) error(s)."
+              )
+          }
+
+          Write-Host (
+              'Windows PowerShell 5.1 syntax ' +
+              'validation passed.'
+          )
+
+      # ============================================================
+      # POWERSHELL 7
+      # ============================================================
+      - name: Parse embedded PowerShell with PowerShell 7
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $raw = Get-Content `
+              -LiteralPath 'Windows_Shortcut_Control.cmd' `
+              -Raw
+
+          $marker = '###<LAVI_POWERSHELL>###'
+
+          $index = $raw.LastIndexOf($marker)
+
+          if ($index -lt 0) {
+              throw 'Embedded PowerShell marker not found.'
+          }
+
+          $code = $raw.Substring(
+              $index + $marker.Length
+          )
+
+          $tokens = $null
+          $errors = $null
+
+          [System.Management.Automation.Language.Parser]::ParseInput(
+              $code,
+              [ref]$tokens,
+              [ref]$errors
+          ) | Out-Null
+
+          if ($errors.Count -gt 0) {
+              foreach ($errorItem in $errors) {
+                  Write-Host (
+                      "Parser error line {0}: {1}" -f
+                      $errorItem.Extent.StartLineNumber,
+                      $errorItem.Message
+                  )
+              }
+
+              throw (
+                  "PowerShell 7 parser found " +
+                  "$($errors.Count) error(s)."
+              )
+          }
+
+          Write-Host (
+              'PowerShell 7 syntax validation passed.'
+          )
+
+      # ============================================================
+      # BATCH BOOTSTRAP
+      # ============================================================
+      - name: Validate batch bootstrap
+        shell: cmd
+        run: |
+          @echo off
+
+          findstr /C:"LAVI_CONTROL_CENTER_SELF" Windows_Shortcut_Control.cmd >nul
+          if errorlevel 1 exit /b 1
+
+          findstr /C:"powershell.exe -NoLogo -NoProfile" Windows_Shortcut_Control.cmd >nul
+          if errorlevel 1 exit /b 1
+
+          findstr /C:"###<LAVI_POWERSHELL>###" Windows_Shortcut_Control.cmd >nul
+          if errorlevel 1 exit /b 1
+
+          echo Batch bootstrap validation passed.
+
+      # ============================================================
+      # README VERSION
+      # ============================================================
+      - name: Validate README version reference
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $version = (
+              Get-Content -LiteralPath 'VERSION' -Raw
+          ).Trim()
+
+          $readme = Get-Content `
+              -LiteralPath 'README.md' `
+              -Raw
+
+          if ($readme -notmatch [regex]::Escape($version)) {
+              Write-Warning (
+                  "README.md does not appear to mention " +
+                  "current version $version."
+              )
+          }
+          else {
+              Write-Host (
+                  "README contains current version $version."
+              )
+          }
+
+      # ============================================================
+      # CHANGELOG
+      # ============================================================
+      - name: Validate changelog version
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $version = (
+              Get-Content -LiteralPath 'VERSION' -Raw
+          ).Trim()
+
+          $changelog = Get-Content `
+              -LiteralPath 'CHANGELOG.md' `
+              -Raw
+
+          if ($changelog -notmatch [regex]::Escape($version)) {
+              throw (
+                  "CHANGELOG.md does not contain " +
+                  "current version $version."
+              )
+          }
+
+          Write-Host (
+              "CHANGELOG contains version $version."
+          )
+
+      # ============================================================
+      # REPOSITORY HYGIENE
+      # ============================================================
+      - name: Repository hygiene
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $tracked = @(
+              git ls-files
+          )
+
+          $forbiddenExact = @(
+              'Thumbs.db',
+              '.DS_Store'
+          )
+
+          foreach ($file in $forbiddenExact) {
+              if ($tracked -contains $file) {
+                  throw (
+                      "Generated file is tracked: $file"
+                  )
+              }
+          }
+
+          $generated = $tracked | Where-Object {
+              $_ -match '(^|/)(bin|obj)/' -or
+              $_ -match '\.tmp$' -or
+              $_ -match '\.log$'
+          }
+
+          if ($generated) {
+              Write-Host 'Generated files detected:'
+
+              $generated | ForEach-Object {
+                  Write-Host "  $_"
+              }
+
+              throw (
+                  'Generated/runtime files must not be ' +
+                  'tracked.'
+              )
+          }
+
+          Write-Host 'Repository hygiene passed.'
+
+      # ============================================================
+      # BASIC SECRET HYGIENE
+      # ============================================================
+      - name: Credential hygiene
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $files = @(
+              git ls-files
+          )
+
+          $patterns = @(
+              '[0-9]{8,12}:[A-Za-z0-9_-]{30,}'
+          )
+
+          $findings = @()
+
+          foreach ($file in $files) {
+              if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+                  continue
+              }
+
+              try {
+                  $content = Get-Content `
+                      -LiteralPath $file `
+                      -Raw `
+                      -ErrorAction Stop
+              }
+              catch {
+                  continue
+              }
+
+              foreach ($pattern in $patterns) {
+                  if ($content -match $pattern) {
+                      $findings += $file
+                      break
+                  }
+              }
+          }
+
+          if ($findings.Count -gt 0) {
+              Write-Host 'Potential credential detected in:'
+
+              $findings |
+                  Sort-Object -Unique |
+                  ForEach-Object {
+                      Write-Host "  $_"
+                  }
+
+              throw (
+                  'Potential credential found in ' +
+                  'tracked repository files.'
+              )
+          }
+
+          Write-Host 'Credential hygiene passed.'
+
+      # ============================================================
+      # SUMMARY
+      # ============================================================
+      - name: CI summary
+        if: always()
+        shell: powershell
+        run: |
+          $version = 'unknown'
+
+          if (Test-Path -LiteralPath 'VERSION') {
+              $version = (
+                  Get-Content -LiteralPath 'VERSION' -Raw
+              ).Trim()
+          }
+
+          $shortSha = $env:GITHUB_SHA
+
+          if ($shortSha.Length -gt 8) {
+              $shortSha = $shortSha.Substring(0, 8)
+          }
+
+          $summary = @(
+              '## Windows Shortcut Control CI',
+              '',
+              '| Check | Value |',
+              '|---|---|',
+              "| Version | ``$version`` |",
+              "| Runner | ``$env:RUNNER_OS`` |",
+              "| Ref | ``$env:GITHUB_REF_NAME`` |",
+              "| Commit | ``$shortSha`` |",
+              '',
+              'Validation completed.'
+          )
+
+          $summary |
+              Add-Content `
+                  -LiteralPath $env:GITHUB_STEP_SUMMARY
